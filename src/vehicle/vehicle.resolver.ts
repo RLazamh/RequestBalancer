@@ -1,7 +1,7 @@
 import { Args, Query, Resolver, Context } from '@nestjs/graphql';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { HttpService } from '@nestjs/axios';
-import { Logger } from '@nestjs/common';
+import { Logger, OnModuleInit } from '@nestjs/common';
 import { GraphQLInt } from 'graphql';
 import { catchError, lastValueFrom, of } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
@@ -10,7 +10,7 @@ import { VehicleResponse } from './vehicle.schema';
 import { ENDPOINTS_VEHICLE } from './endpoint';
 
 @Resolver()
-export class VehicleResolver {
+export class VehicleResolver implements OnModuleInit {
   EXSQUARED_SERVICE = process.env.EXSQUARED_SERVICE;
   private readonly logger: Logger;
 
@@ -19,6 +19,13 @@ export class VehicleResolver {
     private readonly _redisCacheService: RedisCacheService,
   ) {
     this.logger = new Logger(VehicleResolver.name);
+  }
+
+  onModuleInit() {
+    if (process.env.ENVIRONMENT === 'dev') {
+      this.logger.log('Environment: Developer - Sending initial request');
+      this.proccessVehicleData();
+    }
   }
 
   @Query(() => [VehicleResponse], {
@@ -69,11 +76,11 @@ export class VehicleResolver {
   }
 
   @Cron(CronExpression.EVERY_3_HOURS)
-  async proccessVehicleData() {
+  proccessVehicleData() {
     const trackingId = uuidv4();
     const endpointUrl = `${this.EXSQUARED_SERVICE}${ENDPOINTS_VEHICLE.proccessXml()}`;
 
-    this.logger.log(`Calling fetch-xml endpoint - Tracking ID: ${trackingId}`);
+    this.logger.log(`Init proccess-xml endpoint - Tracking ID: ${trackingId}`);
 
     this._httpService
       .post(endpointUrl, null, {
