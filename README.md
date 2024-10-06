@@ -1,85 +1,137 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+# EXSquared GraphQL Service
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+This repository contains the solution for EXSquared LATAM’s vehicle data service using GraphQL. It fetches vehicle data from external APIs, processes it, caches the results in Redis, and exposes it via a GraphQL API. It also includes scheduling for periodic data processing and robust error handling.
 
-## Description
+#### Running the Application with Docker ####
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+1. **Create and Build Docker Containers**
 
-## Project setup
+   To build and run the Docker containers, use the following command:
+   ```bash
+   npm run docker:create
+   ```
 
-```bash
-$ npm install
+2. **Start the Docker Containers**
+
+   If the containers are already created, you can start them with:
+   ```bash
+   npm run docker:start
+   ```
+
+- The application will be available at: [http://localhost:3000/graphql](http://localhost:3000/graphql)
+
+#### Running Locally ####
+
+To run the project locally without Docker:
+
+1. **Install Dependencies**
+
+   Make sure to install all dependencies:
+   ```bash
+   npm install
+   ```
+
+2. **Run the Application**
+
+   Start the application in development mode:
+   ```bash
+   npm run start:dev
+   ```
+
+- The GraphQL Playground will be available at: [http://localhost:3000/graphql](http://localhost:3000/graphql)
+ 
+## Technologies Used
+
+The following technologies have been used to ensure robust functionality:
+
+- **NestJS**: A Node.js framework that helps structure the project with modules, services, and resolvers.
+- **GraphQL**: Used for querying vehicle data, allowing efficient and flexible data access.
+- **Axios**: A promise-based HTTP client for fetching data from external APIs.
+- **Redis**: Used for caching vehicle data to reduce API calls and improve performance.
+- **RxJS**: A reactive programming library for handling HTTP responses and errors.
+- **Jest**: A testing framework used to ensure the reliability of the code.
+
+## Key Features
+
+### 1. GraphQL Vehicle Data Query
+The `VehicleResolver` allows users to query vehicle data with pagination. It interacts with Redis for caching and Axios for fetching data from external APIs.
+
+### 2. Scheduled Data Processing
+Using NestJS's scheduling module, the service periodically fetches and processes vehicle data from an XML API every 3 hours. The processing is initialized via a cron job.
+
+### 3. Error Handling
+The project implements robust error handling mechanisms for failed HTTP requests or data retrieval, with clear logging for debugging.
+
+### Example GraphQL Query
+
+```graphql
+query GetVehicles($limit: Int, $page: Int) {
+  vehicles(limit: $limit, page: $page) {
+    makeId
+    makeName
+    vehicleTypes {
+      typeId
+      typeName
+    }
+  }
+}
 ```
 
-## Compile and run the project
+- **Query Example:**
 
-```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+```json
+{
+  "query": "query ($limit: Int, $page: Int) { vehicles(limit: $limit, page: $page) { makeId makeName vehicleTypes { typeId typeName } } }",
+  "variables": {
+    "limit": 100,
+    "page": 1
+  }
+}
 ```
 
-## Run tests
+## Scripts Overview
 
-```bash
-# unit tests
-$ npm run test
+The project includes various npm scripts to assist in development and deployment:
 
-# e2e tests
-$ npm run test:e2e
+- **start**: Runs the application in production mode using `node dist/main`.
+- **start:dev**: Runs the application in development mode with automatic file watching and restarts.
+- **test**: Executes unit tests using Jest.
+- **test:cov**: Runs unit tests and generates a code coverage report.
 
-# test coverage
-$ npm run test:cov
-```
+### Running Tests
 
-## Resources
+- **To run unit tests**:
+  ```bash
+  npm run test
+  ```
 
-Check out a few resources that may come in handy when working with NestJS:
+- **To run unit tests with coverage**:
+  ```bash
+  npm run test:cov
+  ```
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+## Port Information
 
-## Support
+| Service    | Description                    | Port         |
+|------------|--------------------------------|--------------|
+| Application| GraphQL API (Container)        | 4000         |
+| Redis      | Redis Cache (Container)        | 6379         |
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+The application will be available at:
+- Docker: [http://localhost:4050/graphql](http://localhost:4050/graphql)
+- Local: [http://localhost:4000/graphql](http://localhost:4000/graphql)
 
-## Stay in touch
+## Endpoints Overview
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+| HTTP Method | Endpoint         | Description                                 |
+|-------------|------------------|---------------------------------------------|
+| POST        | `/graphql`       | Exposes GraphQL queries for vehicle data.   |
 
+## Initialization on Startup
+
+The project includes a startup process defined in the `VehicleResolver` class, which triggers an initial data fetch if the environment is set to 'dev'. This is done via the `onModuleInit()` method and ensures that the system starts with fresh vehicle data.
+  
 ## License
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+All rights reserved © 2024 Roger Laza. Unauthorized use, distribution, or reproduction of any part of this material is strictly prohibited.

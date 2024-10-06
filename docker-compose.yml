@@ -1,16 +1,45 @@
 version: '3.8'
+
 services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: new-nest-app
+    ports:
+      - "4050:4050"
+    depends_on:
+      - redis
+    networks:
+      - new-app-network
+    environment:
+      HOST: 0.0.0.0
+      PORT_SERVICE: 4050
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      EXSQUARED_SERVICE: http://localhost:3050
+    volumes:
+      - .:/app
+    restart: unless-stopped
+
   redis:
-    image: "redis:alpine" 
+    image: "redis:alpine"    
     container_name: redis_cache
     ports:
-      - "${REDIS_PORT}:6379"
+      - "6379:6379"
     volumes:
-      - redis_data:/data 
+      - ./data/redis:/data/redis
     environment:
-      - REDIS_PASSWORD=${REDIS_PASSWORD} 
-    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}"] 
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}"]
+    networks:
+      - new-app-network
     restart: unless-stopped
+
+networks:
+  new-app-network:
+    driver: bridge
 
 volumes:
   redis_data:
