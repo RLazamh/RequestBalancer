@@ -38,6 +38,7 @@ lerna-debug.log*
 # temp directory
 .temp
 .tmp
+/data
 
 # Runtime data
 pids

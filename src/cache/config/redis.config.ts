@@ -9,7 +9,7 @@ export class RedisConfigService implements CacheOptionsFactory {
       store: redisStore,
       host: process.env.REDIS_HOST,
       port: parseInt(process.env.REDIS_PORT, 10),
-      ttl: parseInt(process.env.REDIS_TTL, 10), // Time to live in seconds
+      ttl: parseInt(process.env.REDIS_TTL, 10),
       password: process.env.REDIS_PASSWORD,
     };
   }

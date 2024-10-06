@@ -80,7 +80,9 @@ export class VehicleResolver implements OnModuleInit {
     const trackingId = uuidv4();
     const endpointUrl = `${this.EXSQUARED_SERVICE}${ENDPOINTS_VEHICLE.proccessXml()}`;
 
-    this.logger.log(`Init proccess-xml endpoint - Tracking ID: ${trackingId}`);
+    this.logger.log(
+      `Init proccess-xml endpoint - Tracking ID: ${trackingId} url: ${endpointUrl}`,
+    );
 
     this._httpService
       .post(endpointUrl, null, {
