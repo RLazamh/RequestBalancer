@@ -3,6 +3,7 @@ import {
   NestInterceptor,
   ExecutionContext,
   CallHandler,
+  Logger,
 } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import { Observable } from 'rxjs';
@@ -19,7 +20,7 @@ export class TrackingIdInterceptor implements NestInterceptor {
     if (request) {
       const trackingId = uuidv4();
       request.headers['trackingid'] = trackingId;
-      console.log('Tracking ID added to request:', trackingId);
+      Logger.log(`Tracking ID added to request: ${trackingId}`);
     }
 
     return next.handle();

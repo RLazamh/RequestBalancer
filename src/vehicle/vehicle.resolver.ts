@@ -5,6 +5,7 @@ import { Logger } from '@nestjs/common';
 import { GraphQLInt } from 'graphql';
 import { catchError, lastValueFrom, of } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
+import { RedisCacheService } from '../cache/redis.service';
 import { VehicleResponse } from './vehicle.schema';
 import { ENDPOINTS_VEHICLE } from './endpoint';
 
@@ -13,7 +14,10 @@ export class VehicleResolver {
   EXSQUARED_SERVICE = process.env.EXSQUARED_SERVICE;
   private readonly logger: Logger;
 
-  constructor(private readonly _httpService: HttpService) {
+  constructor(
+    private readonly _httpService: HttpService,
+    private readonly _redisCacheService: RedisCacheService,
+  ) {
     this.logger = new Logger(VehicleResolver.name);
   }
 
@@ -26,8 +30,16 @@ export class VehicleResolver {
     @Context() context,
   ): Promise<VehicleResponse[]> {
     const trackingId = context.req.headers['trackingid'];
+    const cacheKey = `vehicles-${limit}-${page}`;
 
     try {
+      const cachedData = await this._redisCacheService.get(cacheKey);
+      if (cachedData) {
+        this.logger.log(
+          `Returning cached vehicle data - Tracking ID: ${trackingId} for limit: ${limit}, page: ${page} `,
+        );
+        return cachedData;
+      }
       const endpointUrl = `${this.EXSQUARED_SERVICE}${ENDPOINTS_VEHICLE.fetchData(limit, page)}`;
 
       this.logger.log(
@@ -39,6 +51,8 @@ export class VehicleResolver {
           headers: { trackingId },
         }),
       );
+
+      this._redisCacheService.set(cacheKey, response.data);
 
       this.logger.log(
         `Successfully fetched vehicle data - Tracking ID: ${trackingId}`,
