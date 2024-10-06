@@ -1,0 +1,19 @@
+{
+  "moduleFileExtensions": ["js", "json", "ts"],
+  "rootDir": ".",
+  "testEnvironment": "node",
+  "transform": {
+    "^.+\\.(t|j)s$": "ts-jest"
+  },
+  "setupFiles": ["<rootDir>/test/jest-config.setup.ts"],
+  "collectCoverageFrom": [
+    "src/**/*.ts",
+    "!**/node_modules/**",
+    "!**/tests/**"
+  ],
+  "coveragePathIgnorePatterns": [
+    "\\.module\\.ts$",
+    "\\.entity\\.ts$",
+    "/infrastructure/db/migration/"
+  ]
+}
